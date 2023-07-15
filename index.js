@@ -5,8 +5,31 @@ const app = express();
 const authRoutes = require('./src/routes/auth');
 const blogRoutes = require('./src/routes/blog');
 const mongoose = require('mongoose');
+const multer = require('multer'); // library for upload file
+const path = require('path');
+// set folder save image
+const fileStorage = multer.diskStorage({
+    destination: (req, file, callback) => {
+        callback(null, 'images');
+    },
+    filename: (req, file, callback) => {
+        callback(null, new Date().getTime() + '-' + file.originalname);
+    }
+})
+// validation file, only format mimetype image
+const fileFilter = (req, file, callback) => {
+    if( file.mimetype === 'image/png' || 
+        file.mimetype === 'image/jpg' || 
+        file.mimetype === 'image/jpeg'){
+        callback(null, true);
+    } else {
+        callback(null, false);
+    }
+}
 
 app.use(bodyParser.json()) // type JSON
+app.use('/images', express.static(path.join(__dirname, 'images'))); // midleware for access image server static
+app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('image')); // midleware muler config, param must be image
 
 // Handle CORS
 app.use((req, res, next) => {
