@@ -1,4 +1,6 @@
 const {validationResult} = require('express-validator');
+const path = require('path');
+const fs = require('fs');
 const BlogPost = require('../models/blog');
 
 // Create Blog Post
@@ -137,3 +139,38 @@ exports.updateBlogPost = (req, res, next) => {
         }
     })
 }
+
+// Delete Blog Post By Id
+exports.deleteBlogPost = (req, res, next) => {
+    const postId = req.params.postId;
+    // cek adapah terdapat blog post dgn id yg dikirimkan
+    BlogPost.findById(postId)
+    .then(post => {
+        if(!post) { // cek dapat atau tidak
+            const err = new Error('Blog Post tidak ditemukan');
+            err.errorStatus = 404;
+            throw err;
+        }
+        // hapus image
+        removeImage(post.image);
+        return BlogPost.findByIdAndRemove(postId); // remove blog post
+    })
+    .then(result => {
+        res.status(200).json({
+            message: 'Hapus Blog Post Berhasil',
+            data: result,
+        })
+    })
+    .catch(err => {
+        next(err);
+    })
+}
+
+const removeImage = (filePath) => {
+    console.log('file path', filePath);
+    console.log('dir name: ', __dirname); // C:\laragon\www\study\mern\backend-api-mern\src\controllers
+    // menggabungkan nama file path
+    filePath = path.join(__dirname, '../..', filePath) // C:\laragon\www\study\mern\backend-api-mern\images\1689429246678-Mern.jpg
+    // cara remove image di node js dgn unlink
+    fs.unlink(filePath, err => console.log('error: ', err));
+} 
