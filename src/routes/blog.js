@@ -12,6 +12,8 @@ router.post('/post', [
     blogController.createBlogPost);
 // [GET] : /v1/blog/posts (Get All blog)
 router.get('/posts', blogController.getAllBlogPost);
+// [GET] : query parameter (pagination) : contoh oleh user (Get All blog) only example from frontend
+// router.get('/posts?page=1&perPage=5', blogController.getAllBlogPost);
 // [GET] : /v1/blog/post/:postId (Get blog by id)
 router.get('/post/:postId', blogController.getBlogPostById);
 // [PUT] : /v1/blog/post/:postId (Update blog post by id)

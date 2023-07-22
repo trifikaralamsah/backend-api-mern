@@ -50,18 +50,44 @@ exports.createBlogPost = (req, res, next) => {
 
 }
 // Get All Blog Post
+// exports.getAllBlogPost = (req, res, next) => {
+//     // find() to get all data in models blog
+//     BlogPost.find()
+//     .then(result => {
+//         res.status(200).json({
+//             message: 'Data Blog Post Berhasil Dipanggil',
+//             data: result
+//         })
+//     })
+//     .catch(err => {
+//         next(err);
+//     });
+// }
 exports.getAllBlogPost = (req, res, next) => {
-    // find() to get all data in models blog
+    const currentPage = parseInt(req.query.page) || 1;
+    const perPage = parseInt(req.query.perPage) || 5;
+    let totalItems;
+
     BlogPost.find()
+    .countDocuments()  // menghitung berapa jml data yg dimiliki.
+    .then(count => {
+        totalItems = count;
+        return BlogPost.find()
+        .skip((currentPage - 1) * perPage) // jika hasil perhitungan 0 berarti di skip datanya dipanggil semua || jika currentpage 2, (2-1)*5 = 5 maka di skip langsung ke 6, karna page 2 butuh data mulai dari 6
+        .limit(perPage) // limit batas sampai 5, jika tdk di limit misal data ada 1000 maka dipanggil sisanya sampai 995.
+    })
     .then(result => {
         res.status(200).json({
             message: 'Data Blog Post Berhasil Dipanggil',
-            data: result
+            data: result,
+            totalData: totalItems,
+            per_page: perPage,
+            current_page: currentPage,
         })
     })
     .catch(err => {
         next(err);
-    });
+    })
 }
 // Get Blog Post By Id
 exports.getBlogPostById = (req, res, next) => {
